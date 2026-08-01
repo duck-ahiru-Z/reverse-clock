@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CLOCK</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      background-color: #ffffff;
+      color: #000000;
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+    }
+    
+    * {
+      border-radius: 0 !important;
+    }
+
+    .hand {
+      transform-origin: bottom center;
+      will-change: transform;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-4">
+
+  <div class="w-full max-w-sm flex flex-col items-center">
+    <div class="relative w-[320px] h-[320px] border-4 border-black bg-white mb-8" id="clock-container">
+      
+      <div class="absolute top-1/2 left-1/2 w-4 h-4 bg-black -mt-2 -ml-2 z-30"></div>
+      
+      <div class="absolute inset-0 z-20 pointer-events-none" id="hands-container">
+        <div id="hour-hand" class="hand absolute bottom-1/2 left-1/2 w-2 h-20 bg-black -ml-1"></div>
+        <div id="min-hand" class="hand absolute bottom-1/2 left-1/2 w-[4px] h-32 bg-black -ml-[2px]"></div>
+        <div id="sec-hand" class="hand absolute bottom-1/2 left-1/2 w-[2px] h-36 bg-red-600 -ml-[1px]"></div>
+      </div>
+
+      <div id="face" class="absolute inset-0 z-10"></div>
+    </div>
+
+    <div class="w-full border-t-4 border-black pt-4">
+      <div id="digital-clock" class="text-4xl font-black tracking-widest text-center">00:00:00</div>
+    </div>
+  </div>
+
+  <script>
+    const face = document.getElementById('face');
+    const clockSize = 320; 
+    const center = clockSize / 2;
+    const numberRadius = 110; 
+
+    for(let i = 0; i < 60; i++) {
+      const angle = -i * 6;
+      const isHour = i % 5 === 0;
+      
+      const wrapper = document.createElement('div');
+      wrapper.className = 'absolute top-0 left-1/2 w-0 h-full flex justify-center';
+      wrapper.style.transform = `rotate(${angle}deg)`;
+
+      const tick = document.createElement('div');
+      tick.className = `mt-1 ${isHour ? 'w-[4px] h-5 bg-black' : 'w-[2px] h-2 bg-gray-300'}`;
+      
+      wrapper.appendChild(tick);
+      face.appendChild(wrapper);
+    }
+
+    for(let i = 1; i <= 12; i++) {
+      const angle = -i * 30; 
+      const rad = angle * Math.PI / 180;
+      
+      const x = center + numberRadius * Math.sin(rad);
+      const y = center - numberRadius * Math.cos(rad);
+
+      const num = document.createElement('div');
+      num.className = 'absolute w-8 h-8 flex items-center justify-center font-bold text-xl text-black';
+      num.style.left = `${x - 16}px`;
+      num.style.top = `${y - 16}px`;
+      num.innerText = i;
+      
+      face.appendChild(num);
+    }
+
+    const hourHand = document.getElementById('hour-hand');
+    const minHand = document.getElementById('min-hand');
+    const secHand = document.getElementById('sec-hand');
+    const digitalClock = document.getElementById('digital-clock');
+
+    function updateTime() {
+      const now = new Date();
+      const h = now.getHours();
+      const m = now.getMinutes();
+      const s = now.getSeconds();
+
+      const sDeg = - (s * 6);
+      const mDeg = - (m * 6 + s * 0.1);
+      const hDeg = - ((h % 12) * 30 + m * 0.5);
+
+      secHand.style.transform = `rotate(${sDeg}deg)`;
+      minHand.style.transform = `rotate(${mDeg}deg)`;
+      hourHand.style.transform = `rotate(${hDeg}deg)`;
+
+      digitalClock.innerText = 
+        `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    }
+
+    updateTime();
+    setInterval(updateTime, 1000);
+  </script>
+</body>
+</html>
